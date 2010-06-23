@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
 import android.util.Log;
+//import android.widget.EditText;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -26,9 +27,12 @@ import org.apache.http.message.BasicNameValuePair;
 
 public class SMSReceiver extends BroadcastReceiver {
 
-	private static final String TARGET_URL = "http://qkhack.appspot.com/itpdemo"; 
-	private static final String IDENTIFIER = "itp"; // in order for an SMS to be processed by TxtGate it should start with this string (case insensitive, use "" to include any SMS message) 
+	private static final String TARGET_URL = "http://qkhack.appspot.com/itpdemo";
+	// in order for an SMS to be processed by TxtGate it should start with this string 
+	// (case insensitive, use "" to include any SMS message, don't forget space in the end)
+	private static final String IDENTIFIER = "itp ";  
 	
+//	EditText outputText;
 	
 	@Override
 	// source: http://www.devx.com/wireless/Article/39495/1954
@@ -45,7 +49,10 @@ public class SMSReceiver extends BroadcastReceiver {
 			
 			if (message != null && message.length() > 0 
 					&& (message.toLowerCase().startsWith(IDENTIFIER) || IDENTIFIER == "")) {
-				Log.d("MessageListener", "MSG RCVD:\"" + message + "\" from: " + sender);
+				Log.d("TXTGATE", "MSG RCVD:\"" + message + "\" from: " + sender);
+				
+//				outputText = (EditText) this.findViewById(R.id.EditText01); 
+//				outputText.setText("MSG RCVD:\"" + message + "\" from: " + sender);	
 				
 				String resp = openURL(sender, message).toString();
 				
@@ -71,7 +78,7 @@ public class SMSReceiver extends BroadcastReceiver {
 			}
 
 		} catch (Exception e) {
-			Log.e("GetMessages", "fail", e);
+			Log.e("TXTGATE", "GetMessages ERROR\n" + e);
 		}
 		return retMsgs;
 	}
@@ -100,21 +107,21 @@ public class SMSReceiver extends BroadcastReceiver {
 		     if (status != HttpStatus.SC_OK) {
 		         ByteArrayOutputStream ostream = new ByteArrayOutputStream();
 		         response.getEntity().writeTo(ostream);
-		         Log.e("HTTP CLIENT", ostream.toString());
+		         Log.e("TXTGATE", "HTTP CLIENT:" + ostream.toString());
 		     } else {
 		         InputStream content = response.getEntity().getContent();
 		         // <consume response>
 		         respTxt = streamread(content);
-		         Log.e("HTTP RESP", respTxt);
+		         Log.e("TXTGATE", "HTTP RESP" + respTxt);
 		         content.close(); // this will also close the connection
 		     }
 
 	        
 	    } catch (ClientProtocolException e) {
-	    	Log.e("openURL", "Protocolx", e);
+	    	Log.e("TXTGATE", "openURL ERROR: Protocolx\n" + e);
 	    	return ("Protocol Error");
 	    } catch (IOException e) {
-	    	Log.e("openURL", "IOx", e);
+	    	Log.e("TXTGATE", "openURL ERROR IOx\n" + e);
 	    	return ("IO Error");
 	    }
 	    
