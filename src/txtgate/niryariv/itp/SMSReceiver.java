@@ -9,7 +9,9 @@ import java.util.List;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
 import android.util.Log;
@@ -27,12 +29,6 @@ import org.apache.http.message.BasicNameValuePair;
 
 public class SMSReceiver extends BroadcastReceiver {
 
-	private static final String TARGET_URL = "http://qkhack.appspot.com/itpdemo";
-	// in order for an SMS to be processed by TxtGate it should start with this string 
-	// (case insensitive, use "" to include any SMS message, don't forget space in the end)
-	private static final String IDENTIFIER = "itp ";  
-	
-//	EditText outputText;
 	
 	@Override
 	// source: http://www.devx.com/wireless/Article/39495/1954
@@ -41,6 +37,12 @@ public class SMSReceiver extends BroadcastReceiver {
 			return;
 		}
 
+		// get settings
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+
+		String identifier = settings.getString("pref_identifier", "itp");
+		String targetUrl =  settings.getString("pref_target_url", "http://qkhack.appspot.com/itpdemo");
+
 		SmsMessage msgs[] = getMessagesFromIntent(intent);
 
 		for (int i = 0; i < msgs.length; i++) {
@@ -48,13 +50,13 @@ public class SMSReceiver extends BroadcastReceiver {
 			String sender = msgs[i].getDisplayOriginatingAddress();
 			
 			if (message != null && message.length() > 0 
-					&& (message.toLowerCase().startsWith(IDENTIFIER) || IDENTIFIER == "")) {
+					&& (message.toLowerCase().startsWith(identifier) || identifier == "")) {
 				Log.d("TXTGATE", "MSG RCVD:\"" + message + "\" from: " + sender);
 				
 //				outputText = (EditText) this.findViewById(R.id.EditText01); 
 //				outputText.setText("MSG RCVD:\"" + message + "\" from: " + sender);	
 				
-				String resp = openURL(sender, message).toString();
+				String resp = openURL(sender, message, targetUrl).toString();
 				
 				// SMS back the response
 				SmsManager smgr = SmsManager.getDefault();
@@ -84,10 +86,10 @@ public class SMSReceiver extends BroadcastReceiver {
 	}
 	
 
-	public String openURL(String sender, String message) {
+	public String openURL(String sender, String message, String targetUrl) {
 	    // Create a new HttpClient and Post Header
 	    HttpClient httpclient = new DefaultHttpClient();
-	    HttpPost httppost = new HttpPost(TARGET_URL);
+	    HttpPost httppost = new HttpPost(targetUrl);
 
 	    String respTxt = "";
 	    	

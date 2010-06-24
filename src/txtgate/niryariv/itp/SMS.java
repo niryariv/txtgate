@@ -5,13 +5,17 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
+import android.widget.TextView;
 
 public class SMS extends Activity {
 	
 	public static final String PREFS_NAME = "TxtGatePrefsFile";
 	
+	public String identifier = "";
+	public String targetUrl = "";
 	
 	public void onResume() {
 		Log.d("TXTGATE", "RESUME");
@@ -21,24 +25,35 @@ public class SMS extends Activity {
 
 //	    SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
 
-		String identifier = settings.getString("pref_identifier", "itp");
-		String targetUrl =  settings.getString("pref_target_url", "http://qkhack.appspot.com/itpdemo");
-		Log.d("TXTGATE", "ident:" + identifier +"\ntarget:" + targetUrl);
+		this.identifier = settings.getString("pref_identifier", "itp");
+		this.targetUrl =  settings.getString("pref_target_url", "http://qkhack.appspot.com/itpdemo");
+
+		Log.d("TXTGATE", "ident:" + this.identifier +"\ntarget:" + this.targetUrl);
 		
+//		this.savePrefs();
+		
+		String infoText = new String();
+		
+		if (this.identifier == "") {
+			infoText = "Directing all SMS messages";
+		} else {
+			infoText = "Directing SMS messages starting with <b>" + this.identifier + "</b>";
+		}
+		
+		infoText = infoText + " to URL <b>" + this.targetUrl +"</b>";
+		infoText = infoText + "<br /><br />Press Menu to change SMS identifier or target URL.";
+		
+		TextView info = (TextView) this.findViewById(R.id.info);
+        info.setText(Html.fromHtml(infoText));
+
 	}	
 	
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // read initial prefs
-////	    SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-//
-//		String identifier = settings.getString("pref_identifier", "itp");
-//		String targetUrl =  settings.getString("pref_target_url", "http://qkhack.appspot.com/itpdemo");
-
         setContentView(R.layout.main);
+        
         Log.d("TXTGATE", "STARTED");
     }
     
@@ -59,15 +74,18 @@ public class SMS extends Activity {
     @Override
     protected void onStop(){
     	super.onStop();
-    	
-    	// save prefs
-//      SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-//      
-//      SharedPreferences.Editor editor = settings.edit();
-//      editor.putString("identifier", self.identifier);
-//      editor.putString("target_url", self.target_url);
-//
-//      // Commit the edits!
-//      editor.commit();
+//    	this.savePrefs();
     }
+    
+//    private void savePrefs(){
+//        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+//        
+//        SharedPreferences.Editor editor = settings.edit();
+//        editor.putString("identifier", this.identifier);
+//        editor.putString("target_url", this.targetUrl);
+//
+//        editor.commit();
+//        
+//        Log.d("TXTGATE", "savePrefs() ident:" + this.identifier +"\ntarget:" + this.targetUrl);
+//    }
 }
