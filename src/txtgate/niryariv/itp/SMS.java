@@ -8,6 +8,9 @@ import android.preference.PreferenceManager;
 import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.TextView;
 
 public class SMS extends Activity {
@@ -17,6 +20,7 @@ public class SMS extends Activity {
 	public String identifier = "";
 	public String targetUrl = "";
 	
+    
 	public void onResume() {
 		Log.d("TXTGATE", "RESUME");
 		super.onResume();
@@ -25,7 +29,7 @@ public class SMS extends Activity {
 
 //	    SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
 
-		this.identifier = settings.getString("pref_identifier", "itp");
+		this.identifier = settings.getString("pref_identifier", "itp").trim();
 		this.targetUrl =  settings.getString("pref_target_url", "http://qkhack.appspot.com/itpdemo");
 
 		Log.d("TXTGATE", "ident:" + this.identifier +"\ntarget:" + this.targetUrl);
@@ -34,14 +38,18 @@ public class SMS extends Activity {
 		
 		String infoText = new String();
 		
-		if (this.identifier == "") {
-			infoText = "Directing all SMS messages";
-		} else {
-			infoText = "Directing SMS messages starting with <b>" + this.identifier + "</b>";
+		infoText = "All SMS messages";
+		
+		if (this.identifier != "") {
+			infoText += " starting with <b>" + this.identifier + "</b>";
 		}
 		
-		infoText = infoText + " to URL <b>" + this.targetUrl +"</b>";
-		infoText = infoText + "<br /><br />Press Menu to change SMS identifier or target URL.";
+		infoText += " are now directed to URL <b>" + this.targetUrl +"</b>";
+		infoText += " - if the response body contains text, it will SMSed back to the sender.";
+
+		infoText += "<br /><br />Press Menu to change SMS identifier or target URL.";
+		
+		infoText += "<br /><br />For questions or feedback, please contact <a href=\"mailto:niryariv@gmail.com\">niryariv@gmail.com</a>";
 		
 		TextView info = (TextView) this.findViewById(R.id.info);
         info.setText(Html.fromHtml(infoText));
@@ -55,6 +63,16 @@ public class SMS extends Activity {
         setContentView(R.layout.main);
         
         Log.d("TXTGATE", "STARTED");
+        
+//    	Button openMenuButton = (Button) findViewById(R.id.settingsButton);
+//        openMenuButton.setOnClickListener(new OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//				// TODO Auto-generated method stub
+//				
+//			}
+//          });
+
     }
     
 

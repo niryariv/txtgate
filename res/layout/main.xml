@@ -9,4 +9,5 @@
     android:text="@string/hello"
     android:textColor="#FFFFFF" android:textSize="30px"/>
 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/info" android:textColor="#FFFFFF"></TextView>
+<!--<Button android:layout_width="fill_parent" android:layout_height="wrap_content" android:gravity="center" android:id="@+id/settingsButton" android:text="Edit Settings" android:layout_marginRight="50px" android:layout_marginLeft="50px"></Button>-->
 </LinearLayout>

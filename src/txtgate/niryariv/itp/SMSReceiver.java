@@ -40,7 +40,7 @@ public class SMSReceiver extends BroadcastReceiver {
 		// get settings
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
 
-		String identifier = settings.getString("pref_identifier", "itp");
+		String identifier = settings.getString("pref_identifier", "itp").trim();
 		String targetUrl =  settings.getString("pref_target_url", "http://qkhack.appspot.com/itpdemo");
 
 		SmsMessage msgs[] = getMessagesFromIntent(intent);
