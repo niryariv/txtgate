@@ -40,7 +40,7 @@ public class SMSReceiver extends BroadcastReceiver {
 		// get settings
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
 
-		String identifier = settings.getString("pref_identifier", "itp").trim();
+		String identifier = settings.getString("pref_identifier", "itp");
 		String targetUrl =  settings.getString("pref_target_url", "http://qkhack.appspot.com/itpdemo");
 
 		SmsMessage msgs[] = getMessagesFromIntent(intent);
@@ -50,7 +50,7 @@ public class SMSReceiver extends BroadcastReceiver {
 			String sender = msgs[i].getDisplayOriginatingAddress();
 			
 			if (message != null && message.length() > 0 
-					&& (message.toLowerCase().startsWith(identifier) || identifier == "")) {
+					&& (message.toLowerCase().startsWith(identifier) || identifier.trim() == "")) {
 				Log.d("TXTGATE", "MSG RCVD:\"" + message + "\" from: " + sender);
 				
 //				outputText = (EditText) this.findViewById(R.id.EditText01); 

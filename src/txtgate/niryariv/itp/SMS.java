@@ -29,7 +29,7 @@ public class SMS extends Activity {
 
 //	    SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
 
-		this.identifier = settings.getString("pref_identifier", "itp").trim();
+		this.identifier = settings.getString("pref_identifier", "itp");
 		this.targetUrl =  settings.getString("pref_target_url", "http://qkhack.appspot.com/itpdemo");
 
 		Log.d("TXTGATE", "ident:" + this.identifier +"\ntarget:" + this.targetUrl);
@@ -40,7 +40,7 @@ public class SMS extends Activity {
 		
 		infoText = "All SMS messages";
 		
-		if (this.identifier != "") {
+		if (this.identifier.trim() != "") {
 			infoText += " starting with <b>" + this.identifier + "</b>";
 		}
 		
