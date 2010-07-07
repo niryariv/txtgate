@@ -10,7 +10,6 @@ tmp/**/*
 *~.nib
 Thumbs.db
 *~
-*.apk
 bin
 gen
 local.properties
