@@ -10,7 +10,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.widget.TextView;
 
-public class SMS extends Activity {
+public class Main extends Activity {
 	
 	public static final String PREFS_NAME = "TxtGatePrefsFile";
 	
@@ -24,14 +24,10 @@ public class SMS extends Activity {
 		
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
 
-//	    SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-
 		this.identifier = settings.getString("pref_identifier", "itp");
 		this.targetUrl =  settings.getString("pref_target_url", "http://qkhack.appspot.com/itpdemo");
 
-		Log.d("TXTGATE", "ident:" + this.identifier +"\ntarget:" + this.targetUrl);
-		
-//		this.savePrefs();
+		Log.d("TXTGATE", "onResume ident:" + this.identifier +"\ntarget:" + this.targetUrl);
 		
 		String infoText = new String();
 		
@@ -41,12 +37,13 @@ public class SMS extends Activity {
 			infoText += " starting with <b>" + this.identifier + "</b>";
 		}
 		
-		infoText += " are now directed to URL <b>" + this.targetUrl +"</b>";
-		infoText += " - if the response body contains text, it will SMSed back to the sender.";
+		infoText += " are now sent to <b>" + this.targetUrl +"</b> in the following format:";
+		infoText += "<p><tt>GET " + this.targetUrl + "?sender=&lt;phone#&gt;&msg=&lt;message&gt;</tt></p>";
+		infoText += "If the response body contains text, it will SMSed back to the sender.";
 
-		infoText += "<br /><br />Press Menu to change SMS identifier or target URL.";
+		infoText += "<br /><br /><b>Press Menu to set SMS identifier or target URL.</b>";
 		
-		infoText += "<br /><br />For questions or feedback, please contact <a href=\"mailto:niryariv@gmail.com\">niryariv@gmail.com</a>";
+		infoText += "<br /><br /><br />Questions/feedback: niryariv@gmail.com";
 		
 		TextView info = (TextView) this.findViewById(R.id.info);
         info.setText(Html.fromHtml(infoText));
@@ -60,16 +57,6 @@ public class SMS extends Activity {
         setContentView(R.layout.main);
         
         Log.d("TXTGATE", "STARTED");
-        
-//    	Button openMenuButton = (Button) findViewById(R.id.settingsButton);
-//        openMenuButton.setOnClickListener(new OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//				// TODO Auto-generated method stub
-//				
-//			}
-//          });
-
     }
     
 
@@ -88,19 +75,8 @@ public class SMS extends Activity {
     
     @Override
     protected void onStop(){
+    	// dont do much with this, atm..
     	super.onStop();
-//    	this.savePrefs();
     }
     
-//    private void savePrefs(){
-//        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-//        
-//        SharedPreferences.Editor editor = settings.edit();
-//        editor.putString("identifier", this.identifier);
-//        editor.putString("target_url", this.targetUrl);
-//
-//        editor.commit();
-//        
-//        Log.d("TXTGATE", "savePrefs() ident:" + this.identifier +"\ntarget:" + this.targetUrl);
-//    }
 }

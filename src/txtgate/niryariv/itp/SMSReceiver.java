@@ -18,6 +18,7 @@ import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
 import android.util.Log;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
@@ -25,8 +26,11 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 
 public class SMSReceiver extends BroadcastReceiver {
 
@@ -97,6 +101,7 @@ public class SMSReceiver extends BroadcastReceiver {
 	}
 
 	
+	// from http://github.com/dimagi/rapidandroid 
 	// source: http://www.devx.com/wireless/Article/39495/1954
 	private SmsMessage[] getMessagesFromIntent(Intent intent) {
 		SmsMessage retMsgs[] = null;
@@ -117,56 +122,29 @@ public class SMSReceiver extends BroadcastReceiver {
 	
 
 	public String openURL(String sender, String message, String targetUrl) {
-	    // Create a new HttpClient and Post Header
-	    HttpClient httpclient = new DefaultHttpClient();
-	    HttpPost httppost = new HttpPost(targetUrl);
+		
+        List<NameValuePair> qparams = new ArrayList<NameValuePair>();
+        qparams.add(new BasicNameValuePair("sender", sender));
+        qparams.add(new BasicNameValuePair("msg", message));
+        String url = targetUrl + "?" + URLEncodedUtils.format(qparams, "UTF-8");
 
-	    String respTxt = "";
-	    	
-	    try {
-	        // Add your data
-	        List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
-	        nameValuePairs.add(new BasicNameValuePair("sender", sender));
-	        nameValuePairs.add(new BasicNameValuePair("msg", message));
-	        httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-
-	        // Execute HTTP Post Request
-	        HttpResponse response = httpclient.execute(httppost);
+        try {
+	        HttpClient client = new DefaultHttpClient();  
+	        HttpGet get = new HttpGet(url);
 	        
-	        int status = response.getStatusLine().getStatusCode();
-
-		     // we assume that the response body contains the error message
-		     if (status != HttpStatus.SC_OK) {
-		         ByteArrayOutputStream ostream = new ByteArrayOutputStream();
-		         response.getEntity().writeTo(ostream);
-		         Log.e("TXTGATE", "HTTP CLIENT:" + ostream.toString());
-		     } else {
-		         InputStream content = response.getEntity().getContent();
-		         // <consume response>
-		         respTxt = streamread(content);
-		         Log.e("TXTGATE", "HTTP RESP" + respTxt);
-		         content.close(); // this will also close the connection
-		     }
-
-	        
-	    } catch (ClientProtocolException e) {
-	    	Log.e("TXTGATE", "openURL ERROR: Protocolx\n" + e);
-	    	return ("Protocol Error");
-	    } catch (IOException e) {
-	    	Log.e("TXTGATE", "openURL ERROR IOx\n" + e);
-	    	return ("IO Error");
-	    }
-	    
-        return (respTxt);
-	} 
-
+	        HttpResponse responseGet = client.execute(get);  
+	        HttpEntity resEntityGet = responseGet.getEntity();  
+	        if (resEntityGet != null) {  
+	        	String resp = EntityUtils.toString(resEntityGet);
+	        	Log.e("TXTGATE", "HTTP RESP" + resp);
+	            return resp;
+	        }
+		} catch (Exception e) {
+			Log.e("TXTGATE", "HTTP REQ FAILED:" + url);
+			e.printStackTrace();
+		}
+		
+		return "";
+	}
 	
-	public String streamread(InputStream in) throws IOException {
-   	 StringBuffer stream = new StringBuffer();
-   	 byte[] b = new byte[4096];
-   	 for (int n; (n = in.read(b)) != -1;) {
-   		 stream.append(new String(b, 0, n));
-   	 }
-   	 return stream.toString();
-    }
 }
