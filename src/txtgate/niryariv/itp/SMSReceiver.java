@@ -3,8 +3,12 @@ package txtgate.niryariv.itp;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -31,6 +35,11 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
 public class SMSReceiver extends BroadcastReceiver {
 
@@ -63,10 +72,26 @@ public class SMSReceiver extends BroadcastReceiver {
 				// send the message to the URL
 				String resp = openURL(sender, message, targetUrl).toString();
 				
+				Log.d("TXTGATE", "RESP:\"" + resp);
+				
 				// SMS back the response
 				if (resp.trim().length() > 0) {
+					ArrayList<ArrayList<String>> items = parseXML(resp);
+					
 					SmsManager smgr = SmsManager.getDefault();
-					smgr.sendTextMessage(sender, null, resp, null, null);
+					
+					for (int j = 0; j < items.size(); j++) {
+						String sendTo = items.get(j).get(0);
+						if (sendTo.toLowerCase() == "sender") sendTo = sender;
+						String sendMsg = items.get(j).get(1);
+						
+						try {
+							Log.d("TXTGATE", "SEND MSG:\"" + sendMsg + "\" TO: " + sendTo);
+							smgr.sendTextMessage(sendTo, null, sendMsg, null, null);
+						} catch (Exception ex) {
+							Log.d("TXTGATE", "SMS FAILED");
+						}
+					}
 				}
 				
 				// delete SMS from inbox, to prevent it from filling up
@@ -147,4 +172,51 @@ public class SMSReceiver extends BroadcastReceiver {
 		return "";
 	}
 	
+	
+	public static ArrayList<ArrayList<String>> parseXML(String xml) {
+    	ArrayList<ArrayList<String>> output = new ArrayList<ArrayList<String>>();
+    	
+    	try {
+    		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+
+        	Document doc = dBuilder.parse(new InputSource(new StringReader(xml)));
+        	
+        	NodeList rnodes = doc.getElementsByTagName("response");
+        	
+            NodeList nodes = rnodes.item(0).getChildNodes(); 
+            
+             for (int i=0; i < nodes.getLength(); i++) {
+            	 List<String> item = new ArrayList<String>();
+             	
+            	 Node node = nodes.item(i);
+            	 if (node.getNodeType() != Node.ELEMENT_NODE) continue;
+            	 
+            	 Element e = (Element) node;
+            	 String nodeName = e.getNodeName();
+            	 
+            	 if (nodeName.equalsIgnoreCase("sms")) {
+            		 if (!e.getAttribute("phone").equals("")) {
+            			 item.add(e.getAttribute("phone"));
+            			 item.add(e.getFirstChild().getNodeValue());
+            			 output.add((ArrayList<String>) item);
+            		 }
+            	 } else if (nodeName.equalsIgnoreCase("sms-to-sender")) {
+        			 item.add("sender");
+        			 item.add(e.getFirstChild().getNodeValue());
+        			 output.add((ArrayList<String>) item);
+            	 } else {
+            		 continue;
+            	 }
+            	 
+             }
+             Log.e("TXTGATE", "PARSING XML RETURNS " + output );
+             return (output);
+
+        } catch (Exception e) {
+        	Log.e("TXTGATE", "PARSING XML FAILED: " + xml );
+            e.printStackTrace();
+            return (output);
+        }
+    }	
 }
