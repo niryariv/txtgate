@@ -182,33 +182,36 @@ public class SMSReceiver extends BroadcastReceiver {
 
         	Document doc = dBuilder.parse(new InputSource(new StringReader(xml)));
         	
-        	NodeList rnodes = doc.getElementsByTagName("response");
+        	NodeList rnodes = doc.getElementsByTagName("reply");
         	
             NodeList nodes = rnodes.item(0).getChildNodes(); 
             
              for (int i=0; i < nodes.getLength(); i++) {
-            	 List<String> item = new ArrayList<String>();
-             	
-            	 Node node = nodes.item(i);
-            	 if (node.getNodeType() != Node.ELEMENT_NODE) continue;
-            	 
-            	 Element e = (Element) node;
-            	 String nodeName = e.getNodeName();
-            	 
-            	 if (nodeName.equalsIgnoreCase("sms")) {
-            		 if (!e.getAttribute("phone").equals("")) {
-            			 item.add(e.getAttribute("phone"));
-            			 item.add(e.getFirstChild().getNodeValue());
-            			 output.add((ArrayList<String>) item);
-            		 }
-            	 } else if (nodeName.equalsIgnoreCase("sms-to-sender")) {
-        			 item.add("sender");
-        			 item.add(e.getFirstChild().getNodeValue());
-        			 output.add((ArrayList<String>) item);
-            	 } else {
-            		 continue;
+            	 try {
+	            	 List<String> item = new ArrayList<String>();
+	             	
+	            	 Node node = nodes.item(i);
+	            	 if (node.getNodeType() != Node.ELEMENT_NODE) continue;
+	            	 
+	            	 Element e = (Element) node;
+	            	 String nodeName = e.getNodeName();
+	            	 
+	            	 if (nodeName.equalsIgnoreCase("sms")) {
+	            		 if (!e.getAttribute("phone").equals("")) {
+	            			 item.add(e.getAttribute("phone"));
+	            			 item.add(e.getFirstChild().getNodeValue());
+	            			 output.add((ArrayList<String>) item);
+	            		 }
+	            	 } else if (nodeName.equalsIgnoreCase("sms-to-sender")) {
+	        			 item.add("sender");
+	        			 item.add(e.getFirstChild().getNodeValue());
+	        			 output.add((ArrayList<String>) item);
+	            	 } else {
+	            		 continue;
+	            	 }
+            	 } catch (Exception e){
+            		 Log.e("TXTGATE", "FAILED PARSING XML NODE# " + i  );
             	 }
-            	 
              }
              Log.e("TXTGATE", "PARSING XML RETURNS " + output );
              return (output);
